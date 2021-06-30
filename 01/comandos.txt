@@ -1,0 +1,122 @@
+Criando e executando container:
+
+docker container run hello-world
+
+
+Listar container em execução:
+
+docker container ls
+
+
+Listar todos container:
+
+docker container ls -a
+
+
+Criando imagem do ubuntu e abrindo terminal para acessá-la:
+
+docker container run -it ubuntu /bin/bash
+
+
+Fazer um bind de porta (acessar o container com app web):
+
+docker container run -d -p 8080:80 nginx
+
+Acessar o endereço: "localhost:8080"
+
+
+Criar imagem com arquivo Dockerfile (ubuntu com curl instalado):
+
+docker image build -t ubuntu-curl-novo .
+
+
+Ver imagens:
+
+docker image ls
+
+
+Rodando container a partir da imagem do DockerFile:
+
+docker container run -it ubuntu /bin/bash
+
+
+Ver histórico de construção da imagem:
+
+docker image history ubuntu-curl-novo
+
+
+Fazer autenticação no repositório dockerhub (docker registry) para enviar uma imagem a ele:
+
+docker login
+
+
+Corrigindo o nome da imagem para enviar ao repositório <REPOSITORIO_ID>/<NOMEIMAGEM>:<VERSAO>:
+
+docker image build -t 145869745236/ubuntu-curl:v1 .
+
+docker push 145869745236/ubuntu-curl:v1
+
+
+Criando uma imagem alterando apenas a TAG da versão:
+
+docker tag 145869745236/ubuntu-curl:v1 145869745236/ubuntu-curl:latest
+
+docker push 145869745236/ubuntu-curl:latest
+
+
+Após deletar a imagem local é possível obtê-la do repositório:
+
+docker container run -it 145869745236/ubuntu-curl:v1 /bin/bash
+
+
+TESTANDO APLICAÇÃO:
+
+git clone https://github.com/CarlosChiarelli/api-conversao.git
+
+npm install
+
+node index.js
+
+Endereço: http://localhost:8080/api-docs/
+
+
+Após criar Dockerfile e .dockerignore, criar a imagem:
+
+docker image build -t 145869745236/api-conversao:v1 .
+
+docker push 145869745236/api-conversao:v1
+
+
+Rodando aplicação:
+
+docker container run -d -p 8080:8080 145869745236/api-conversao:v1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
