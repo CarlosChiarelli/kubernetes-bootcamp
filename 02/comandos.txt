@@ -1,0 +1,248 @@
+Instalação do k3d e kubectl.
+
+
+Criar um cluster kubernetes com k3d:
+
+k3d cluster create meuPrimeiroCluster
+
+
+Ver nós do cluster:
+
+kubectl get nodes
+
+
+Visualizar o container do cluster:
+
+docker container ls
+
+
+Criar um cluster kubernetes sem o LoadBalancer:
+
+k3d cluster create meuSegundoCluster --no-lb
+
+
+Visualizar cluster (server é control plane e agent é node):
+
+k3d cluster list
+
+
+Deletando cluster:
+
+k3d cluster delete meuPrimeiroCluster
+
+k3d cluster delete meuSegundoCluster
+
+
+Criando cluster com mais de um nó (3 controllers e 3 nós):
+
+k3d cluster create meucluster --servers 3 --agents 3
+
+
+Fazendo deploy do kubernetes. POD (executa container), ReplicaSet (garante resiliência), Deployment (atualizar versão sem parar e perder a anterior, downtime zero) e Service (colocar aplicação no ar).
+
+
+Para encontrar qual APIVersion do POD (manifesto) encontrar:
+
+kubectl api-resources
+
+
+cd deploy-kubernetes
+
+docker login
+
+kubectl create -f ./meupod.yaml
+
+
+Obter informação dos pods:
+
+kubectl get pods
+
+kubectl describe pod
+
+
+Fazendo bind da minha porta para porta do pod:
+
+kubectl port-forward pod/meupod 8080:80
+
+(visualizar localhost:8080)
+
+
+
+kubectl delete pod meupod
+
+kubectl create -f ./
+
+
+Selecionando objeto a partir do label:
+
+kubectl get pods -l app=nginx
+
+
+kubectl delete pod meupod
+
+kubectl delete pod meusegundopod
+
+
+
+Replicaset (gerenciador pods) é a camada que fica acima do pod dando resiliência ele:
+
+kubectl apply -f ./meureplicaset.yaml
+
+kubectl get replicaset
+
+kubectl describe replicaset meureplicaset
+
+
+Após aumentar quantidade de réplicas:
+
+kubectl apply -f ./meureplicaset.yaml 
+
+kubectl get pods
+
+
+Testando resilencia (deletar pod) e escalabilidade:
+
+kubectl delete pod NAME  # replicaset cria um novo
+
+kubectl scale replicaset meureplicaset --replicas 20
+
+
+Testando atualização da aplicação (atualizando app web para green).
+
+Para isso existe o deployment, camada acima que gerencia o replicaset.
+
+kubectl apply -f ./meureplicaset.yaml
+
+
+Deletando replicaset:
+
+kubectl delete -f ./meureplicaset.yaml
+
+
+No final preciso apenas do arquivo meudeployment.yaml pois as camadas abaixo ficam implicitas:
+
+kubectl apply -f ./meudeployment.yaml
+
+kubectl get deployment
+
+kubectl get replicaset
+
+kubectl get pods -o wide # mais detalhes
+
+
+Fazendo callback para versão anterior:
+
+kubectl rollout undo deployment meudeployment
+
+
+
+Criar um service para poder acessar os pods criados no cluster kubernetes.
+
+O services expões portas dos pods para eles se conversarem (dentro cluster) ou expõe uma porta para internet.
+
+Nodeport é para caso on-premisse (exe: máquina local). Caso estivesse na nuvem seria LoadBalance.
+
+kubectl apply -f ./service.yaml
+
+kubectl get services
+
+
+Recriar o cluster para fazer o bind com a porta 30000 do loadbalancer para acessar o container:
+
+k3d cluster delete meucluster
+
+k3d cluster create --agents 3 --servers 3 -p "8080:30000@loadbalancer"
+
+docker container ls
+
+kubectl apply -f ./meudeployment.yaml
+
+kubectl apply -f ./service.yaml
+
+kubectl get pods
+
+kubectl get service
+
+kubectl get all
+
+
+
+APLICAÇÃO PYTHON
+
+
+Após criar o Dockerfile dentro do repositorio src e mudar para diretório rotten-potatoes/src:
+
+docker build -t 145869745236/rotten-potatoes:v1 .
+
+docker login
+
+docker push 145869745236/rotten-potatoes:v1
+
+docker tag 145869745236/rotten-potatoes:v1 145869745236/rotten-potatoes:latest
+
+docker push 145869745236/rotten-potatoes:latest
+
+
+Criando novamente o cluster kubernete:
+
+k3d cluster create meucluster --servers 1 --agents 2 -p "8080:30000@loadbalancer"
+
+kubectl get nodes
+
+
+Após escrever o manifesto de deploy do mongodb:
+
+cd ..
+
+kubectl apply -f ./k8s/mongodb/deployment.yaml
+
+kubectl get pods
+
+
+Após escrever o manifesto de service do mongodb:
+
+kubectl apply -f ./k8s/mongodb/service.yaml
+
+kubectl get all
+
+
+Seguir os mesmos passos, manifestos para aplicação web (escrever e aplicar):
+
+kubectl apply -f ./k8s/web/deployment.yaml
+
+kubectl apply -f ./k8s/web/service.yaml
+
+
+Acessar: localhost:8080
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+https://kubedev.io/kubernetes-bootcamp-aula-02/
+
+https://www.youtube.com/watch?v=UhzBSWL9dH4
+
+
+
+
+
+
+
+
+
+
+
